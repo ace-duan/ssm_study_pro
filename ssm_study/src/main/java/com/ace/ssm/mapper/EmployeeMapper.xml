@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ace.ssm.mapper.EmployeeMapper">
+	<!-- public List<Employee> findAll(); -->
+	<select id="findAll" resultMap="getEmpResultMap">
+		select id,name,gender,hireDate,salary,dept_id from tb_employee
+	</select>
+
+	<!-- https://blog.csdn.net/qq_41717185/article/details/108067919 -->
+	<!-- https://blog.csdn.net/qq_36306640/article/details/103174710?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.control -->
+	<!-- https://blog.csdn.net/qq_20610631/article/details/81671997  https://www.cnblogs.com/quinntian/p/10763167.html -->
+	<resultMap type="com.ace.ssm.domain.Employee"
+		id="getEmpResultMap">
+		<id column="id" property="empId" />
+		<result column="name" property="name" />
+		<result column="gender" property="gender" />
+		<result column="hireDate" property="hireDate"
+			javaType="java.util.Date" />
+		<result column="salary" property="salary" />
+		<!-- javaType="com.ace.ssm.domain.Department"可省 -->
+		<association property="dept" column="dept_id"
+			javaType="com.ace.ssm.domain.Department" fetchType="eager"
+			select="com.ace.ssm.mapper.DepartmentMapper.findById" />
+	</resultMap>
+	<!-- <association property="engine" javaType="org.apache.ibatis.submitted.associationtest.Engine"> 
+		<result column="enginetype" property="type"/> <result column="enginecylinders" 
+		property="cylinders"/> </association> -->
+
+	<!-- public void addEmp(Employee emp); -->
+	<insert id="addEmp" parameterType="com.ace.ssm.domain.Employee">
+		insert into tb_employee(id,name,gender,hireDate,salary,dept_id)
+		values(#{empId},#{name},#{gender},#{hireDate},#{salary},#{dept.id})
+	</insert>
+	<!-- public Employee findById(String empId); -->
+	<select id="findById" resultMap="getEmpResultMap">
+		select * from tb_employee where id=#{empId}
+	</select>
+	<!-- public void updateEmp(Employee emp); -->
+	<update id="updateEmp"
+		parameterType="com.ace.ssm.domain.Employee">
+		update tb_employee
+		<set>
+			<if test="name!=null and name!=''">
+				name=#{name},
+			</if>
+			<if test="gender!=null">
+				gender=#{gender},
+			</if>
+			<if test="hireDate!=null">
+				hireDate=#{hireDate},
+			</if>
+			<if test="salary!=null">
+				salary=#{salary},
+			</if>
+			<if test="dept.id!=null">
+				dept_id=#{dept.id},
+			</if>
+			id=#{empId}
+		</set>
+		<where>
+			id=#{empId}
+		</where>
+	</update>
+	<!-- public void deleteById(String id); -->
+	<!-- 简单参数传递是指： 传递单个基本类型参数，数字类型、String 或 传递多个基本类型参数， parameterType 属性可以省略； 
+		传递单个基本类型参数时 SQL语句中参数的引用名称并不需要和接口中的参数名称相同，https://www.cnblogs.com/canger/p/9931774.html -->
+	<delete id="deleteById">
+		delete from tb_employee where id=#{id}
+		<!-- delete from tb_employee where id=#{empId} -->
+		<!-- delete from tb_employee where id=${id} -->
+	</delete>
+</mapper>

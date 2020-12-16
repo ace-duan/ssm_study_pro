@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="WebApp_ID" version="3.1">
+
+	<!-- 配置上下文的监听器ContextLoadListener，该类在spring-web.jar包中，其作用： 在web项目启动的同时加载并启动spring框架,同时我们也需要给该监听器配置一个上下文的初始化参数，目的是用来指定 
+		spring框架的核心配置文件名称及路径 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:spring.xml</param-value>
+	</context-param>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<!-- 配置前端控制器DispatcherServlet，该类在spring-webmvc.jar包中，其作用： 
+		1.在web项目启动的同时启动springmvc框架 
+		2.把所有的用户请求都交给springmvc框架来处理 -->
+	<servlet>
+		<servlet-name>DispatcherServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<!-- 给该前端控制器配置一个初始化参数contextConfigLocation，目的用来动态指定springmvc框架的核心配置文件名称及路径， 
+			如果没有配置该初始化参数的话，默认会到WEB-INF/目录下查找名称为<servlet-name>-servlet.xml作为springmvc框架的核心配置文件 -->
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:springmvc.xml</param-value>
+		</init-param>
+		<!-- 表示servlet 在当前web应用被加载时被创建，而不是等第一次请求时被创建 -->
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DispatcherServlet</servlet-name>
+		<!-- 注意此处配置的路径为反斜杠“/”，注意不能配置成"/* -->
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<!-- 配置文件中如果有多个过滤器，执行顺序是从上到下 -->
+	<!-- 3.配置编码的过滤器CharacterEncodingFilter，其作用是统一全站编码 ,该类在spring-web.jar包中 -->
+	<filter>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<!-- 配置相关的初始化参数，如encoding,用来指定所采用的编码 -->
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<!-- 配置初始化参数forceRequestEncoding，用来指定请求前的编码设置为UTF-8 -->
+		<init-param>
+			<param-name>forceRequestEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<!-- 配置初始化参数forceResponseEncoding，用来指定响应前的编码设置为UTF-8 -->
+		<init-param>
+			<param-name>forceResponseEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<!-- 配置过滤器HiddenHttpMethodFilter，其作用，如果采用基于REST风格的开发，需要把一些POST请求转换成PUT，DELETE等时就需要使用该过滤器 -->
+	<filter>
+		<filter-name>HiddenHttpMethodFilter</filter-name>
+		<filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>HiddenHttpMethodFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+</web-app>

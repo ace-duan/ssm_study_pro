@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        https://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        https://www.springframework.org/schema/aop/spring-aop.xsd">
+       
+       <!-- 配置开启类扫描的注解解析器 --> 
+       <context:component-scan base-package="com.ace.ssm">
+          <!-- 配置过滤掉@Controller注解，因为在springmvc.xml文件中已经进行扫描配置了 -->
+         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+       </context:component-scan>
+       <!-- 配置开启依赖注入的注解解析器 -->
+       <context:annotation-config/>
+      <!-- 引入jdbc.properties -->     
+      <context:property-placeholder location="classpath:jdbc.properties"/>
+      <!-- 配置数据源（druid），该类在druid.jar包中 -->
+      <bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+             <property name="driverClassName" value="${jdbc.driver}"/>
+		     <property name="url" value="${jdbc.dburl}"/>
+		     <property name="username" value="${jdbc.user}"/>
+		     <property name="password" value="${jdbc.password}"/>
+		     <!-- 获取设置初始化最小连接数 -->
+		     <property name="initialSize" value="${jdbc.pool.initialSize}"/>
+		     <!-- 获取设置连接池最小空闲连接数 -->
+		     <property name="minIdle" value="${jdbc.pool.minIdle}"/>
+		     <!-- 获取设置连接池最大并发使用连接数量 -->
+		     <property name="maxActive" value="${jdbc.pool.maxActive}"/>
+		     <!-- 获取设置连接最大等待时间 毫秒 -->
+		     <property name="maxWait" value="${jdbc.pool.maxWait}"/>
+      </bean>
+      <!-- 事务管理器TransactionManager,该类在spring-jdbc.jar包中 -->
+      <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+          <property name="dataSource" ref="druidDataSource"/>
+      </bean>
+      <!-- 配置开启基于注解的事务管理器的解析器，主要针对注解@Transactional -->
+      <tx:annotation-driven transaction-manager="transactionManager"/>
+      <!-- 配置SqlSessionFactory，该类在mybatis-spring.jar包中 -->
+      <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+          <property name="dataSource" ref="druidDataSource"/>
+          <!-- 配置整合并加载mybatis框架的核心配置文件 -->
+          <property name="configLocation" value="classpath:mybatis-config.xml"/>
+          <!-- 也可通过以下配置直接加载mapper.xml -->
+          <!-- <property name="mapperLocations" value="classpath:com/ace/ssm/mapper/*.xml"/> -->
+     		
+     		<!-- 注入分页插件 -->
+     	    <property name="plugins">
+     	    	<array>
+     	    		<bean class="com.github.pagehelper.PageInterceptor"></bean>
+     	    	</array>
+     	    </property>
+      </bean>
+      <!-- 配置基于MapperScannerConfigurer接口类扫描的方式来创建接口类的代理实现,该类在mybatis-spring.jar包中 -->
+      <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+         <property name="basePackage" value="com.ace.ssm.mapper"/>
+         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+      </bean>
+  </beans>

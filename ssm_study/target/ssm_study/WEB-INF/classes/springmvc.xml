@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+        
+        <!-- 配置开启类扫描的注解解析器配置,这里主要针对@Controller注解 -->
+        <context:component-scan base-package="com.ace.ssm.controller,com.ace.springmvc"/>
+        <!-- 配置开启依赖注入的注解解析器配置，主要针对@Autowired,@Resource等注解 -->
+        <context:annotation-config />
+        <!-- 配置对于静态资源的放行操作配置（把静态资源交给web服务器来处理）
+        如果有springmvc对应的@requestMapping则交给Spring处理；如果没有对应的requestMapping，则将该请求交给服务器默认的servlet去处理（直接访问）
+        添加此注解还要配合mvc:annotation-driven（协调作用）一起使用才能动静态资源都能访问，否则只能访问静态资源 -->
+        <mvc:default-servlet-handler/>
+        <!-- 配置开启基于注解的处理器映射器与适配器的配置，默认是开启的
+        此配置是springmvc的基础配置，很多功能都需要通过该注解mvc:annotation-driven来协调
+        比如：当配置<mvc:view-controller path="handler/testMvcViewController" view-name="success"/>时mvc:view-controller会将原controller屏蔽，所有请求到mvc:view-controller中找，如果想要原生controller与mvc:view-controller共存，则需要加mvc:annotation-driven即可
+         -->
+        <mvc:annotation-driven validator="validation"/>
+        <!-- 配置视图解析器，该类在spring-webmvc.jar包中 -->
+        <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+          <property name="prefix" value="/WEB-INF/jsp/"/>
+          <property name="suffix" value=".jsp"/>
+        </bean>
+        
+        <!-- 需要commons-fileupload.jar和commons-io.jar支持 导入依赖时只需导入commons-fileupload（包含commons-io）-->
+		<!--200*1024*1024即200M resolveLazily属性启用是为了推迟文件解析，以便捕获文件大小异常 -->
+		<bean id="multipartResolver"
+			class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+			<!-- 上传单个文件的最大值，如果-1，表示无限制 -->
+			<property name="maxUploadSize" value="209715200" />
+			<property name="defaultEncoding" value="UTF-8" />
+			<property name="resolveLazily" value="true" />
+		</bean>
+		
+		<!-- SimpleMappingExceptionResolver:以配置的方式处理异常 -->
+		<bean id="" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+			<!-- 如果发生异常，异常对象会被保存在exceptionAttribute值中，并且会放入request域中，如果不写value默认为exception -->
+			<property name="exceptionAttribute" value="e"></property>
+			<property name="exceptionMappings">
+				<props>
+					<!-- 相当于catch(ArithmeticException e) {跳转：error}-->
+					<prop key="java.lang.ArithmeticException">
+						error
+					</prop>
+					<prop key="java.lang.NullPointerException">
+						error
+					</prop>
+				</props>
+			</property>
+		</bean>
+        
+        <!-- 加载国际化资源文件 -->
+        <!-- 配置加载校验错误的属性提示文件,该类在spring-context.jar包中 -->
+        <!-- <bean id="messageSource"  class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+          通过该basename属性来指定对应的错误消息提示文件的位置及名称
+          <property name="basename" value="classpath:message"/>
+        </bean> -->
+        <bean id="messageSource"  class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+          <property name="basename" value="classpath:i18n"/>
+        </bean>
+         <!-- <bean id="messageSource"  class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+          <property name="basenames">
+          		<list>
+          			<value>classpath:message</value>
+          			<value>classpath:i18n</value>
+          		</list>
+          </property>
+        </bean>  -->
+        <!-- 配置数据格式化注解所依赖的bean -->
+        <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        </bean>
+        
+        <!-- 注册校验器,该类也是在spring-context.jar包中 -->
+        <bean id="validation" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+           <property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>
+           <property name="validationMessageSource" ref="messageSource"/>
+        </bean>
+        <!-- 配置拦截器 用于登录前拦截，未登录会跳到登录界面-->
+        <mvc:interceptors>
+        <!-- 注册一个自定义的拦截器https://blog.csdn.net/sunboylife/article/details/102892912 -->
+        	<mvc:interceptor>
+        		<!-- 配置要实施拦截的路径，可依次添加多个path -->
+        		<mvc:mapping path="/emp/**"/>
+        		<!-- <mvc:mapping path="/emp/**"/> -->
+        		<!-- <ref bean="securityInterceptor"/> -->
+        		<bean class="com.ace.ssm.interceptor.SecurityInterceptor"/>
+        	</mvc:interceptor>
+        	<mvc:interceptor>
+        		<!-- 指定拦截的路径，基于ant风格 -->
+        		<mvc:mapping path="/**"/>
+        		<!-- 指定不拦截的路径 -->
+        		<mvc:exclude-mapping path="/springmvc/testUpload"/>
+        		<bean class="com.ace.springmvc.interceptor.MyInterceptor"/>
+        	</mvc:interceptor>
+        	
+        	<!-- 默认拦截全部请求 -->
+        	<!-- <bean class="com.ace.springmvc.interceptor.MyInterceptor"/> -->
+        </mvc:interceptors>
+ </beans>
