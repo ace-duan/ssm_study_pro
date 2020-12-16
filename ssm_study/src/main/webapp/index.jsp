@@ -8,7 +8,7 @@
 <title>login</title>
 </head>
 <body>
-哈哈
+hello ace
 <%-- <jsp:forward page="login/toLogin"></jsp:forward> --%>
 
 </body>
