@@ -8,7 +8,8 @@
 <title>login</title>
 </head>
 <body>
-<jsp:forward page="login/toLogin"></jsp:forward>
+哈哈
+<%-- <jsp:forward page="login/toLogin"></jsp:forward> --%>
 
 </body>
 </html>
