@@ -19,8 +19,7 @@ public class LibsysUserServiceImpl implements LibsysUserService {
 	
 	@Override
 	public User login(UserVo userVo) {
-//		return libsysUserMapper.login(userVo);
-		return null;
+		return libsysUserMapper.login(userVo);
 	}
 
 	@Override
@@ -30,7 +29,7 @@ public class LibsysUserServiceImpl implements LibsysUserService {
 		user.setUserid(userId);
 		user.setLastlogintime(new Date());
 		//update
-//		this.libsysUserMapper.updateByPrimaryKeySelective(user);
+		this.libsysUserMapper.updateByPrimaryKeySelective(user);
 	}
 
 }

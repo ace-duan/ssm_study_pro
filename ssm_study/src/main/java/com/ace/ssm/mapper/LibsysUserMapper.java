@@ -6,6 +6,7 @@ public interface LibsysUserMapper {
 
 	//user login
 	User login(User user);
+//	User login(String usercode, String password);
 
-//	void updateByPrimaryKeySelective(User user);
+	void updateByPrimaryKeySelective(User user);
 }

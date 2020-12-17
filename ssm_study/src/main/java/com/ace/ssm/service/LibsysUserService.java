@@ -7,6 +7,7 @@ public interface LibsysUserService {
 
 	// login
 	User login(UserVo userVo);
+//	User login(String usercode,String password);
 
 	// Update the last login time of the user
 	void updateUser(Integer userId);
